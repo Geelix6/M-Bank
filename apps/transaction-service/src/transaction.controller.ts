@@ -1,20 +1,31 @@
 import { Controller, Get } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { AppService } from './transaction.service';
+import { TransactionService } from './transaction.service';
+
+interface Data {
+  accountNumber?: number;
+}
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly transactionService: TransactionService) {}
 
   // Обрабатываем сообщение с командой 'process'
   @MessagePattern({ cmd: 'process' })
-  processMessage(data: any) {
+  processMessage(data: Data) {
     console.log('MS2 получил данные:', data);
-    return { message: 'Ответ от MS2: сообщение обработано' };
+
+    const account = this.transactionService.getAccount(data.accountNumber);
+
+    if (!account) {
+      return { message: 'Нет такого пользователя' };
+    }
+
+    return account;
   }
 
   // @Get()
   // getHello(): string {
-  //   return this.appService.getHello();
+  //   return this.transactionService.getHello();
   // }
 }

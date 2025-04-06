@@ -1,22 +1,13 @@
-// import { Controller, Get } from '@nestjs/common';
-// import { AppService } from './api-gateway.service';
-
-// @Controller()
-// export class AppController {
-//   constructor(private readonly appService: AppService) {}
-
-//   @Get()
-//   getHello(): string {
-//     return this.appService.getHello();
-//   }
-// }
-
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import {
   ClientProxy,
   ClientProxyFactory,
   Transport,
 } from '@nestjs/microservices';
+
+interface IUser {
+  name: string;
+}
 
 @Controller()
 export class AppController {
@@ -31,9 +22,9 @@ export class AppController {
   }
 
   // HTTP‑маршрут, который вызывается React‑приложением
-  @Get('api/trigger')
-  async trigger() {
-    const payload = { payload: 'Тестовое сообщение' };
+  @Post('api/user')
+  async trigger(@Body() user: IUser) {
+    const payload = { name: user.name };
     // Отправляем сообщение с командой 'trigger' в MS1
     const response = await this.client
       .send({ cmd: 'trigger' }, payload)

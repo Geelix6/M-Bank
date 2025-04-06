@@ -8,7 +8,7 @@ export default defineConfig({
 
   server: {
     proxy: {
-      "/api/trigger": {
+      "/api": {
         target: "http://localhost:3000",
       },
     },
