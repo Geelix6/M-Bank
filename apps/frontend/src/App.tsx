@@ -13,11 +13,11 @@ export default function App() {
 
   const fetchUserData = async (e: React.FormEvent) => {
     e.preventDefault()
-    const name = inputRef.current?.value?.trim()
+    const phoneNumber = inputRef.current?.value?.trim()
 
-    if (!name) {
+    if (!phoneNumber) {
       // валидация
-      // alert('Введите имя!')
+      // alert('Введите номер!')
       return
     }
 
@@ -29,7 +29,7 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ phoneNumber }),
       })
 
       if (!res.ok) {

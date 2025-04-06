@@ -7,8 +7,8 @@ import {
 } from '@nestjs/microservices';
 import { AccountService } from './account.service';
 
-interface Data {
-  name: string;
+interface IUserPhoneNumber {
+  phoneNumber: string;
 }
 
 @Controller()
@@ -24,11 +24,11 @@ export class AppController {
 
   // Обрабатываем сообщение с командой 'trigger'
   @MessagePattern({ cmd: 'trigger' })
-  async handleTrigger(data: Data) {
+  async handleTrigger(data: IUserPhoneNumber) {
     console.log('MS1 получил сообщение:', data);
 
     const dataToMS2 = {
-      accountNumber: this.accountService.getUser(data.name),
+      accountNumber: this.accountService.getUser(data.phoneNumber),
     };
 
     // Пересылаем данные во второй микросервис с командой 'process'

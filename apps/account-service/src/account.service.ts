@@ -4,9 +4,9 @@ import { Injectable } from '@nestjs/common';
 const users: {
   [key: string]: number;
 } = {
-  // имя --> account number
-  john: 123,
-  ben: 124,
+  // номер телефона --> account number
+  89055461034: 123,
+  89588237565: 124,
 };
 
 @Injectable()

@@ -10,14 +10,14 @@ export interface IUser {
 const accounts: {
   [key: number]: IUser;
 } = {
-  // имя --> account number
+  // account number --> IUser
   123: {
-    name: 'john',
+    name: 'dan 1',
     accountNumber: 123,
     balance: 124000,
   },
   124: {
-    name: 'ben',
+    name: 'dan 2',
     accountNumber: 124,
     balance: 78500,
   },

@@ -5,8 +5,8 @@ import {
   Transport,
 } from '@nestjs/microservices';
 
-interface IUser {
-  name: string;
+interface IUserPhoneNumber {
+  phoneNumber: string;
 }
 
 @Controller()
@@ -23,8 +23,8 @@ export class AppController {
 
   // HTTP‑маршрут, который вызывается React‑приложением
   @Post('api/user')
-  async trigger(@Body() user: IUser) {
-    const payload = { name: user.name };
+  async trigger(@Body() user: IUserPhoneNumber) {
+    const payload = { phoneNumber: user.phoneNumber };
     // Отправляем сообщение с командой 'trigger' в MS1
     const response = await this.client
       .send({ cmd: 'trigger' }, payload)
