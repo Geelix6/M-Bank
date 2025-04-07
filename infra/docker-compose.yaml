@@ -1,0 +1,15 @@
+services:
+  proxy:
+    image: nginx:alpine3.19
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+  app:
+    # тег поменять на mbank
+    image: ghcr.io/geelix/frontend:dev
+
+  api-gateway:
+    # тег поменять на mbank
+    image: ghcr.io/geelix/
