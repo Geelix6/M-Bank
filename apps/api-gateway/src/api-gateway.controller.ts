@@ -1,12 +1,25 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import {
   ClientProxy,
   ClientProxyFactory,
   Transport,
 } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 interface IUserPhoneNumber {
   phoneNumber: string;
+}
+
+interface IUser {
+  name: string;
+  accountNumber: number;
+  balance: number;
 }
 
 @Controller()
@@ -21,14 +34,31 @@ export class AppController {
     });
   }
 
-  // HTTP‑маршрут, который вызывается React‑приложением
   @Post('api/user')
-  async trigger(@Body() user: IUserPhoneNumber) {
+  async trigger(@Body() user: IUserPhoneNumber): Promise<IUser> {
     const payload = { phoneNumber: user.phoneNumber };
-    // Отправляем сообщение с командой 'trigger' в MS1
-    const response = await this.client
-      .send({ cmd: 'trigger' }, payload)
-      .toPromise();
-    return response;
+
+    try {
+      // Отправляем сообщение в MS1
+      const response = await firstValueFrom<IUser>(
+        this.client.send({ cmd: 'trigger' }, payload),
+      );
+      return response;
+    } catch (error) {
+      console.error('Ошибка в API Gateway:', error);
+
+      let errorMessage: string;
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      } else {
+        errorMessage = 'Internal server error';
+      }
+
+      // Преобразуем RpcException из MS1 в HttpException для клиента
+      throw new HttpException(
+        errorMessage || 'Internal server error',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

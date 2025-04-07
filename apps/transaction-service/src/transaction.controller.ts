@@ -1,9 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { TransactionService } from './transaction.service';
 
 interface IUserAccountNumber {
-  accountNumber?: number;
+  accountNumber: number;
 }
 
 @Controller()
@@ -16,13 +16,6 @@ export class AppController {
     console.log('MS2 получил данные:', data);
 
     const account = this.transactionService.getAccount(data.accountNumber);
-
-    if (!account) {
-      return {
-        message:
-          'Нет пользователя с таким номером. Возможно стоит разворачивать запрос еще на уровне account service',
-      };
-    }
 
     return account;
   }

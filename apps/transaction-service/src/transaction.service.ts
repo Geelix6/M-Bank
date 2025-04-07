@@ -6,11 +6,8 @@ export interface IUser {
   balance: number;
 }
 
-// временная база данных
-const accounts: {
-  [key: number]: IUser;
-} = {
-  // account number --> IUser
+// временная база данных - account number --> IUser
+const accounts: Record<number, IUser> = {
   123: {
     name: 'dan 1',
     accountNumber: 123,
@@ -25,11 +22,7 @@ const accounts: {
 
 @Injectable()
 export class TransactionService {
-  getAccount(accountNumber?: number): IUser | undefined {
-    if (!accountNumber) {
-      return;
-    }
-
+  getAccount(accountNumber: number): IUser {
     return accounts[accountNumber];
   }
 }

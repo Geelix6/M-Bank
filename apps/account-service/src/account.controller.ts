@@ -1,14 +1,22 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import {
   MessagePattern,
   ClientProxy,
   ClientProxyFactory,
   Transport,
+  RpcException,
 } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 import { AccountService } from './account.service';
 
 interface IUserPhoneNumber {
   phoneNumber: string;
+}
+
+interface IUser {
+  name: string;
+  accountNumber: number;
+  balance: number;
 }
 
 @Controller()
@@ -24,22 +32,23 @@ export class AppController {
 
   // Обрабатываем сообщение с командой 'trigger'
   @MessagePattern({ cmd: 'trigger' })
-  async handleTrigger(data: IUserPhoneNumber) {
+  async handleTrigger(data: IUserPhoneNumber): Promise<IUser> {
     console.log('MS1 получил сообщение:', data);
 
-    const dataToMS2 = {
-      accountNumber: this.accountService.getUser(data.phoneNumber),
-    };
+    const accountNumber = this.accountService.getUser(data.phoneNumber);
 
-    // Пересылаем данные во второй микросервис с командой 'process'
-    const response = await this.client
-      .send({ cmd: 'process' }, dataToMS2)
-      .toPromise();
+    if (!accountNumber) {
+      throw new RpcException({
+        status: 'error',
+        message: 'User not found',
+      });
+    }
+
+    const payload = { accountNumber };
+
+    const response = await firstValueFrom<IUser>(
+      this.client.send({ cmd: 'process' }, payload),
+    );
     return response;
   }
-
-  // @Get()
-  // getHello(): string {
-  //   return this.accountService.getHello();
-  // }
 }

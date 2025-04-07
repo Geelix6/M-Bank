@@ -6,12 +6,17 @@ interface IUser {
   balance: number
 }
 
+interface IApiError {
+  message: string
+}
+
 export default function App() {
   const [data, setData] = useState<IUser | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
 
-  const fetchUserData = async (e: React.FormEvent) => {
+  const fetchUserData = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     const phoneNumber = inputRef.current?.value?.trim()
 
@@ -22,6 +27,8 @@ export default function App() {
     }
 
     setLoading(true)
+    setError(null)
+    setData(null)
 
     try {
       const res = await fetch('/api/user', {
@@ -33,13 +40,18 @@ export default function App() {
       })
 
       if (!res.ok) {
-        throw new Error(`Ошибка: ${res.statusText}`)
+        const errorData: IApiError = await res.json()
+        throw new Error(errorData.message)
       }
 
-      const json = await res.json()
+      const json: IUser = await res.json()
       setData(json)
     } catch (error) {
-      console.error('Ошибка при получении данных:', error)
+      let errorMessage = 'Ошибка при получении данных'
+      if (error && typeof error === 'object' && 'message' in error && error.message !== '') {
+        errorMessage = (error as { message: string }).message
+      }
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -50,17 +62,17 @@ export default function App() {
       <form onSubmit={fetchUserData}>
         <div className="mb-2 max-w-xl">
           <label
-            htmlFor="first_name"
+            htmlFor="phone_number"
             className="mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
-            Ваше имя
+            Номер телефона
           </label>
           <input
             ref={inputRef}
             type="text"
-            id="first_name"
+            id="phone_number"
             className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-            placeholder="Имя"
+            placeholder="Введите номер телефона"
             required
           />
         </div>
@@ -73,6 +85,12 @@ export default function App() {
           {loading ? 'Загрузка...' : 'Получить данные'}
         </button>
       </form>
+
+      {error && (
+        <div className="mb-4 rounded border border-red-500 bg-red-100 p-4 text-red-700">
+          {error}
+        </div>
+      )}
 
       {data && (
         <div className="rounded border bg-gray-100 p-4 dark:bg-gray-800 dark:text-white">
