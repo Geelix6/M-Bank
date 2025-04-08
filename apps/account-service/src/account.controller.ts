@@ -26,7 +26,10 @@ export class AppController {
   constructor(private readonly accountService: AccountService) {
     this.client = ClientProxyFactory.create({
       transport: Transport.TCP,
-      options: { port: 3002 },
+      options: {
+        host: process.env.TRANSACTION_SERVICE_HOST ?? 'localhost',
+        port: parseInt(process.env.TRANSACTION_SERVICE_PORT ?? '3002', 10),
+      },
     });
   }
 

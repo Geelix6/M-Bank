@@ -3,13 +3,15 @@ import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { AppModule } from './account.module';
 
 async function bootstrap() {
+  const port = parseInt(process.env.PORT ?? '3001', 10);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
       transport: Transport.TCP,
-      options: { port: 3001 },
+      options: { port },
     },
   );
   await app.listen();
+  console.log(`account-service запущен на порту ${port}`);
 }
-bootstrap();
+void bootstrap();

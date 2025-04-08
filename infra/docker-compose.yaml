@@ -6,10 +6,20 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
 
-  app:
-    # тег поменять на mbank
-    image: ghcr.io/geelix/frontend:dev
+  frontend:
+    image: ghcr.io/mbank/frontend:dev
 
   api-gateway:
-    # тег поменять на mbank
-    image: ghcr.io/geelix/
+    image: ghcr.io/mbank/api-gateway:dev
+    environment:
+      - ACCOUNT_SERVICE_HOST=account-service
+      - ACCOUNT_SERVICE_PORT=3001
+
+  account-service:
+    image: ghcr.io/mbank/account-service:dev
+    environment:
+      - TRANSACTION_SERVICE_HOST=transaction-service
+      - TRANSACTION_SERVICE_PORT=3002
+
+  transaction-service:
+    image: ghcr.io/mbank/transaction-service:dev

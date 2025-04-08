@@ -27,10 +27,12 @@ export class AppController {
   private client: ClientProxy;
 
   constructor() {
-    // Подключаемся к микросервису 1 (порт 3001)
     this.client = ClientProxyFactory.create({
       transport: Transport.TCP,
-      options: { port: 3001 },
+      options: {
+        host: process.env.ACCOUNT_SERVICE_HOST || 'localhost',
+        port: parseInt(process.env.ACCOUNT_SERVICE_PORT ?? '3001', 10),
+      },
     });
   }
 
