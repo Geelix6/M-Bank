@@ -8,7 +8,10 @@ async function bootstrap() {
     AppModule,
     {
       transport: Transport.TCP,
-      options: { port },
+      options: {
+        host: '0.0.0.0',
+        port,
+      },
     },
   );
   await app.listen();
