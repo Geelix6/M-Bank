@@ -1,21 +1,22 @@
-FROM node:20.11.1-alpine3.19 AS build-stage
-
-# Устанавливаем pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+FROM node:20.11.1-alpine3.19 AS builder
 
 WORKDIR /app
 
+RUN npm i -g pnpm@10 
+
 COPY package.json pnpm-lock.yaml ./
+
 RUN pnpm install --frozen-lockfile
 
 COPY . .
+
 RUN pnpm run build
 
-FROM nginx:alpine3.19 AS serve-stage
+FROM nginx:alpine3.19 AS runner
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
