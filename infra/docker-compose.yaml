@@ -1,10 +1,10 @@
 services:
-  proxy:
-    image: nginx:alpine3.19
+  reverse-proxy:
+    image: ghcr.io/mbank/reverse-proxy:dev
     ports:
       - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    environment:
+      - API_GATEWAY_PORT=${API_GATEWAY_PORT}
 
   frontend:
     image: ghcr.io/mbank/frontend:dev
@@ -12,14 +12,18 @@ services:
   api-gateway:
     image: ghcr.io/mbank/api-gateway:dev
     environment:
+      - PORT=${API_GATEWAY_PORT}
       - ACCOUNT_SERVICE_HOST=account-service
-      - ACCOUNT_SERVICE_PORT=3001
+      - ACCOUNT_SERVICE_PORT=${ACCOUNT_SERVICE_PORT}
 
   account-service:
     image: ghcr.io/mbank/account-service:dev
     environment:
+      - PORT=${ACCOUNT_SERVICE_PORT}
       - TRANSACTION_SERVICE_HOST=transaction-service
-      - TRANSACTION_SERVICE_PORT=3002
+      - TRANSACTION_SERVICE_PORT=${TRANSACTIONS_SERVICE_PORT}
 
   transaction-service:
     image: ghcr.io/mbank/transaction-service:dev
+    environment:
+      - PORT=${TRANSACTIONS_SERVICE_PORT}

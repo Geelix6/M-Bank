@@ -1,6 +1,12 @@
 group "default" {
-  targets = ["transaction-service", "account-service", "api-gateway", "frontend"]
-  tags = ["ghcr.io/mbank/transaction-service:dev", "ghcr.io/mbank/account-service:dev", "ghcr.io/mbank/api-gateway:dev", "ghcr.io/mbank/frontend:dev"]
+  targets = ["transaction-service", "account-service", "api-gateway", "frontend", "reverse-proxy"]
+  tags = [
+    "ghcr.io/mbank/transaction-service:dev",
+    "ghcr.io/mbank/account-service:dev",
+    "ghcr.io/mbank/api-gateway:dev",
+    "ghcr.io/mbank/frontend:dev",
+    "ghcr.io/mbank/reverse-proxy:dev"
+  ]
 }
 
 target "transaction-service" {
@@ -21,4 +27,9 @@ target "api-gateway" {
 target "frontend" {
   context = "../apps/frontend"
   tags = ["ghcr.io/mbank/frontend:dev"]
+}
+
+target "reverse-proxy" {
+  context = "../apps/reverse-proxy"
+  tags = ["ghcr.io/mbank/reverse-proxy:dev"]
 }
