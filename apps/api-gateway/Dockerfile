@@ -1,4 +1,6 @@
-FROM node:20.11.1-alpine3.19 AS builder
+ARG NODE_IMAGE=node:22.15.0-alpine3.21@sha256:5ef237d055ac3c076f47eda1310f2214eb23c30a53aecdc20c35fd17780fa4ee
+
+FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /app
 
@@ -14,7 +16,7 @@ RUN pnpm run build
 
 RUN pnpm prune --prod
 
-FROM node:20.11.1-alpine3.19 AS runner
+FROM ${NODE_IMAGE} AS runner
 
 WORKDIR /app
 
