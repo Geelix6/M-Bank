@@ -6,6 +6,35 @@ services:
     environment:
       - API_GATEWAY_PORT=${API_GATEWAY_PORT}
 
+  db-keycloak:
+    container_name: db-keycloak
+    image: postgres:16.8-alpine3.21@sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c
+    environment:
+      POSTGRES_USER: ${POSTGRES_KC_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_KC_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_KC_DB}
+    volumes:
+      - ../apps/keycloak/db:/var/lib/postgresql/data
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:26.2.1@sha256:9869b88191392727f0be7301e53573cc39c13c9d9b9b08492c97d1ea40366eae
+    environment:
+      KC_HOSTNAME: localhost
+      KC_DB_URL: jdbc:postgresql://db-keycloak/${POSTGRES_KC_DB}
+      KC_DB: postgres
+      KC_DB_USERNAME: ${POSTGRES_KC_USER}
+      KC_DB_PASSWORD: ${POSTGRES_KC_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_RELATIVE_PATH: /auth
+    ports:
+      - "8080:8080"
+    command: ["start", "--import-realm", "--http-enabled=true"]
+    volumes:
+      - ../apps/keycloak/realms:/opt/keycloak/data/import
+      - ../apps/keycloak/themes:/opt/keycloak/themes
+
   frontend:
     image: ghcr.io/mbank/frontend:dev
 
