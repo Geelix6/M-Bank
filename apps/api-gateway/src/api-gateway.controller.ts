@@ -36,6 +36,12 @@ export class AppController {
     });
   }
 
+  // @Post('/api/webhook/keycloak')
+  // async keycloakWebhook(@Body() body: any): Promise<any> {
+  //   console.log('Received Keycloak webhook:', body);
+  //   return Promise.resolve();
+  // }
+
   @Post('api/user')
   async trigger(@Body() user: IUserPhoneNumber): Promise<IUser> {
     const payload = { phoneNumber: user.phoneNumber };

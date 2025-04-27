@@ -28,11 +28,14 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_RELATIVE_PATH: /auth
+      KC_SPI_EVENTS_LISTENER_WEBHOOK_SERVER_URI: http://api-gateway:${API_GATEWAY_PORT}/api/webhook/keycloak
+      KC_SPI_EVENTS_LISTENER_WEBHOOK_INCLUDE_USER_EVENTS: REGISTER
     ports:
       - "8080:8080"
     command: ["start", "--import-realm", "--http-enabled=true"]
     volumes:
       - ../apps/keycloak/realms:/opt/keycloak/data/import
+      - ../apps/keycloak/providers/keycloak-event-webhook.jar:/opt/keycloak/providers/keycloak-event-webhook.jar
       - ../apps/keycloak/themes:/opt/keycloak/themes
 
   frontend:
