@@ -6,14 +6,10 @@
     <link rel="stylesheet" href="${url.resourcesPath}/css/custom.css" />
   </head>
   <body>
-    <#if messages?? && messages?has_content>
-      <#list messages as m>
-        <div class="kc-feedback-text">${m.message}</div>
-      </#list>
-    <#else>
-      <div class="kc-feedback-text">Unknown error</div>
-    </#if>
-
-    <a href="/">← ${msg("backToLogin")! "Вернуться"}</a>
+    <div>
+      <h1>Ошибка инициализации стартового баланса</h1>
+      <p>Наши сервисы могут быть временно недоступными. Пройдите регистрацию с теми же данными позже</p>
+      <a href="/">${kcSanitize(msg("backToLogin"))?no_esc}</a>
+    <div>
   </body>
 </html>

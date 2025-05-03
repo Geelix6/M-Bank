@@ -117,8 +117,8 @@
                 "manage-users",
                 "query-groups",
                 "manage-identity-providers",
-                "impersonation",
                 "manage-clients",
+                "impersonation",
                 "view-clients",
                 "create-client",
                 "manage-authorization",
@@ -402,6 +402,7 @@
     "containerId": "628c0990-09e0-4441-b4a5-beeb2d289da6"
   },
   "requiredCredentials": ["password"],
+  "passwordPolicy": "length(8)",
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyInitialCounter": 0,
