@@ -4,6 +4,8 @@ FROM ${NGINX_IMAGE}
 
 COPY nginx.conf.template /etc/nginx/nginx.conf.template
 COPY entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
 

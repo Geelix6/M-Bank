@@ -90,6 +90,13 @@ a:hover {
   font-size: 16px;
 }
 
+#kc-form input[type="password"],
+#kc-register-form input[type="password"] {
+  width: calc(100% - 40px);
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
 #kc-form label,
 #kc-register-form label {
   font-size: 14px;
