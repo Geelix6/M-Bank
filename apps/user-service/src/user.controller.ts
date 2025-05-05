@@ -26,6 +26,9 @@ export class UserController {
 
   @MessagePattern({ cmd: 'register' })
   async handleUserRegister(
+    // payload обновили, теперь принимается еще и username, email, firstName, lastName
+    // возможно для типизации нужно будет создать отдельный класс как в api-gateway
+    // с использованием class-validator и class-transformer
     @Payload() payload: { userId: string },
   ): Promise<boolean> {
     try {

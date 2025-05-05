@@ -58,7 +58,6 @@ export class AppController {
   @Post('/api/webhook/keycloak')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async keycloakWebhook(@Body() body: KeycloakAuthenticatorDto): Promise<void> {
-    // body - добавить чтобы keycloak возвращал username и email lastName и firstName
     try {
       await firstValueFrom(
         this.userClient.send({ cmd: 'register' }, { ...body }).pipe(
