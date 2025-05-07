@@ -4,6 +4,7 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-plugin-prettier';
+import path from 'node:path';
 
 export default tseslint.config(
   {
@@ -12,6 +13,7 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   eslintPluginPrettierRecommended,
+
   {
     plugins: {
       prettier,
@@ -31,11 +33,11 @@ export default tseslint.config(
         ...globals.node,
         ...globals.jest,
       },
-      ecmaVersion: 5,
+      ecmaVersion: 2021,
       sourceType: 'module',
       parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+        tsconfigRootDir: path.resolve(process.cwd()),
+        project: ['./tsconfig.json'],
       },
     },
   },
