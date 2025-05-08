@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   MessagePattern,
   ClientProxy,
@@ -8,6 +8,7 @@ import {
   RpcException,
 } from '@nestjs/microservices';
 import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller()
 export class UserController {
@@ -24,16 +25,11 @@ export class UserController {
     // });
   }
 
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   @MessagePattern({ cmd: 'register' })
-  async handleUserRegister(
-    // payload обновили, теперь принимается еще и username, email, firstName, lastName
-    // возможно для типизации нужно будет создать отдельный класс как в api-gateway
-    // с использованием class-validator и class-transformer
-    @Payload() payload: { userId: string },
-  ): Promise<boolean> {
+  async handleUserRegister(@Payload() user: CreateUserDto): Promise<boolean> {
     try {
-      await this.userService.registerUser(payload.userId);
-      return true;
+      return await this.userService.registerUser(user);
     } catch {
       throw new RpcException('REGISTER_FAILED');
     }
