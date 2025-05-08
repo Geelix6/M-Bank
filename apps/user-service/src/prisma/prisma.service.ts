@@ -7,7 +7,20 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   async onModuleInit() {
-    await this.$connect();
+    const maxRetries = 10;
+    const retryDelay = 2000;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await this.$connect();
+        return;
+      } catch {
+        if (attempt === maxRetries) {
+          process.exit(1);
+        }
+        await new Promise((res) => setTimeout(res, retryDelay));
+      }
+    }
   }
 
   async onModuleDestroy() {

@@ -65,5 +65,3 @@ services:
     environment:
       - PORT=${USER_SERVICE_PORT}
       - DATABASE_URL=postgresql://${POSTGRES_USER_SERVICE_USER}:${POSTGRES_USER_SERVICE_PASSWORD}@db-user-service:5432/${POSTGRES_USER_SERVICE_DB}?schema=public
-    depends_on:
-      - db-user-service
