@@ -28,8 +28,8 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_RELATIVE_PATH: /auth
-      KC_SPI_AUTHENTICATOR_REGISTER_WITH_BALANCE_USER_SERVICE_URL: http://api-gateway:3000/api/webhook/keycloak
-      # KC_SPI_AUTHENTICATOR_REGISTER_WITH_BALANCE_USER_SERVICE_URL: http://host.docker.internal:3000/api/webhook/keycloak
+      KC_SPI_AUTHENTICATOR_REGISTER_WITH_BALANCE_USER_SERVICE_URL: http://api-gateway:${API_GATEWAY_PORT}/webhook/keycloak
+      # KC_SPI_AUTHENTICATOR_REGISTER_WITH_BALANCE_USER_SERVICE_URL: http://host.docker.internal:3000/webhook/keycloak
     ports:
       - "8080:8080"
     command: ["start", "--import-realm", "--http-enabled=true"]

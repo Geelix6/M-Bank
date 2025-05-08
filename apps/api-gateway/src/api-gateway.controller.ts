@@ -49,13 +49,8 @@ export class AppController {
     });
   }
 
-  // здесь приписку api надо будет убрать, потому что api проксируется через nginx
-  // и к любом api можно делать запросы извне
-  // все остальные эндпоинты будут защищены JWT токенами
-  // а этот оставим открытым для keycloak
-  // но при этом снаружи добраться до этого пути будет нельзя, ведь в реверс-прокси не будет проксирования этого пути
-  // но это все надо протестировать
-  @Post('/api/webhook/keycloak')
+  // не забываем про защиту роутов, этот защищать не нужно, а все на /api надо будет
+  @Post('/webhook/keycloak')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async keycloakWebhook(@Body() body: KeycloakAuthenticatorDto): Promise<void> {
     try {
