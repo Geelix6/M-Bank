@@ -402,7 +402,7 @@
     "containerId": "628c0990-09e0-4441-b4a5-beeb2d289da6"
   },
   "requiredCredentials": ["password"],
-  "passwordPolicy": "length(8)",
+  "passwordPolicy": "length(8) and maxLength(127)",
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyInitialCounter": 0,
