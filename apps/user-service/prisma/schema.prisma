@@ -9,11 +9,11 @@ datasource db {
 }
 
 model User {
-  id        String   @id
-  username  String   @unique
-  email     String   @unique
-  firstName String
-  lastName  String
-  balance   Decimal
+  id        String   @id @db.Uuid
+  username  String   @unique @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  firstName String   @db.VarChar(255)
+  lastName  String   @db.VarChar(255)
+  balance   Decimal  @default(0) @db.Decimal(21, 2)
   createdAt DateTime @default(now())
 }

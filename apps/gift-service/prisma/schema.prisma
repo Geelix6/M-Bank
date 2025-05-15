@@ -9,6 +9,6 @@ datasource db {
 }
 
 model Gift {
-  userId    String   @id
+  userId    String   @id @db.Uuid
   notBefore DateTime @default(now())
 }

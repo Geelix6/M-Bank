@@ -9,11 +9,11 @@ datasource db {
 }
 
 model Transaction {
-  id         String          @id @default(uuid())
-  fromUserId String
-  toUserId   String
+  id         String          @id @default(uuid()) @db.Uuid
+  fromUserId String          @db.Uuid
+  toUserId   String          @db.Uuid
   type       TransactionType
-  amount     Decimal
+  amount     Decimal         @db.Decimal(21, 2)
   time       DateTime        @default(now())
 }
 
