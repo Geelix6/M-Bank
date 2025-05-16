@@ -46,7 +46,11 @@ export class UserController {
   async handleUserDebit(@Payload() dto: ChangeBalaceDto): Promise<boolean> {
     try {
       return await this.userService.debit(dto);
-    } catch {
+    } catch (e) {
+      console.log(e);
+      if (e instanceof RpcException) {
+        throw e;
+      }
       throw new RpcException('DEBIT_FAILED');
     }
   }

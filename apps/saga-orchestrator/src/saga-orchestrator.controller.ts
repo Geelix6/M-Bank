@@ -186,7 +186,9 @@ export class SagaOrchestratorController {
           .pipe(
             timeout(10000),
             catchError(() => {
-              return throwError(() => new RpcException('USER_SERVICE_ERROR'));
+              return throwError(
+                () => new RpcException('MAKE_TRANSACTION_ERROR'),
+              );
             }),
           ),
       );
@@ -215,6 +217,91 @@ export class SagaOrchestratorController {
       );
 
       return winAmount;
+    } catch (_e) {
+      const e = _e as RpcException;
+      for (const undo of compensations.reverse()) {
+        try {
+          await undo();
+        } catch (err) {
+          console.log(`Произошла ошибка ${err}`);
+        }
+      }
+      throw new RpcException(e.message);
+    }
+  }
+
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @MessagePattern({ cmd: 'saga.makeTransaction' })
+  async handleTransactionMake(
+    @Payload() transaction: TransactionDto,
+  ): Promise<boolean> {
+    const compensations: (() => Promise<boolean>)[] = [];
+    const { fromUserId, toUserId, amount } = transaction;
+
+    try {
+      await firstValueFrom(
+        this.userClient
+          .send<
+            boolean,
+            ChangeBalaceDto
+          >({ cmd: 'user.debit' }, { userId: fromUserId, amount })
+          .pipe(
+            timeout(10000),
+            catchError((_e) => {
+              const e = _e as RpcException;
+              return throwError(() => new RpcException(e.message));
+            }),
+          ),
+      );
+      compensations.push(
+        async () =>
+          await firstValueFrom(
+            this.userClient.send<boolean, ChangeBalaceDto>(
+              { cmd: 'user.credit' },
+              { userId: fromUserId, amount },
+            ),
+          ),
+      );
+
+      const transactionId = await firstValueFrom(
+        this.transactionClient
+          .send<
+            string,
+            TransactionDto
+          >({ cmd: 'transaction.make' }, { ...transaction })
+          .pipe(
+            timeout(10000),
+            catchError((_e) => {
+              const e = _e as RpcException;
+              return throwError(() => new RpcException(e.message));
+            }),
+          ),
+      );
+      compensations.push(
+        async () =>
+          await firstValueFrom(
+            this.transactionClient.send<boolean, TransactionCredentialsDto>(
+              { cmd: 'transaction.delete' },
+              { transactionId },
+            ),
+          ),
+      );
+
+      await firstValueFrom(
+        this.userClient
+          .send<
+            boolean,
+            ChangeBalaceDto
+          >({ cmd: 'user.credit' }, { userId: toUserId, amount })
+          .pipe(
+            timeout(10000),
+            catchError(() => {
+              return throwError(() => new RpcException('USER_SERVICE_ERROR'));
+            }),
+          ),
+      );
+
+      return true;
     } catch (_e) {
       const e = _e as RpcException;
       for (const undo of compensations.reverse()) {

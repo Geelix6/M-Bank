@@ -16,6 +16,7 @@ import {
 import { catchError, firstValueFrom, throwError, timeout } from 'rxjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserCredentialsDto } from './dto/user-credentials.dto';
+import { TransactionDto } from './dto/transaction.dto';
 
 @Controller()
 export class AppController {
@@ -57,15 +58,15 @@ export class AppController {
   }
 
   @Post('/api/gifts')
-  // данные нужно будет получить из токена
-  async claimGift() {
-    const userId = 'ad022397-a713-4ba5-b25b-afbeb182a476';
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async claimGift(@Body() user: UserCredentialsDto): Promise<number> {
+    const { userId } = user;
 
     try {
       const winAmount = await firstValueFrom(
         this.sagaOrchestrator
           .send<
-            boolean,
+            number,
             UserCredentialsDto
           >({ cmd: 'saga.claimGift' }, { userId })
           .pipe(
@@ -90,6 +91,45 @@ export class AppController {
 
       throw new HttpException(
         'Failed to claim gift',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('/api/transactions')
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async makeTransaction(@Body() transaction: TransactionDto): Promise<void> {
+    const { fromUserId, toUserId, amount } = transaction;
+
+    try {
+      await firstValueFrom(
+        this.sagaOrchestrator
+          .send<
+            boolean,
+            TransactionDto
+          >({ cmd: 'saga.makeTransaction' }, { fromUserId, toUserId, amount })
+          .pipe(
+            timeout(10000),
+            catchError((_e) => {
+              const e = _e as RpcException;
+              return throwError(() => e);
+            }),
+          ),
+      );
+      return;
+    } catch (_e) {
+      const e = _e as RpcException;
+      console.error('Error: ', e);
+
+      if (e.message == 'NOT_ENOUGH_BALANCE') {
+        throw new HttpException(
+          "You cannot make this transaction. You don't have enough on balance",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      throw new HttpException(
+        'Failed to make transaction',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

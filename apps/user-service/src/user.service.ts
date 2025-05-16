@@ -60,6 +60,16 @@ export class UserService {
     const { userId, amount } = dto;
 
     try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new RpcException('USER_NOT_FOUND');
+      }
+      if (user.balance.toNumber() < amount) {
+        throw new RpcException('NOT_ENOUGH_BALANCE');
+      }
+
       await this.prisma.user.update({
         where: { id: userId },
         data: { balance: { decrement: amount } },
@@ -67,6 +77,9 @@ export class UserService {
       return true;
     } catch (e) {
       console.log(e);
+      if (e instanceof RpcException) {
+        throw e;
+      }
       throw new RpcException('DEBIT_FAILED');
     }
   }
