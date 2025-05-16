@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class KeycloakAuthenticatorDto {
+export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   userId: string;

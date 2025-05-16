@@ -13,38 +13,19 @@ import {
   RpcException,
   Transport,
 } from '@nestjs/microservices';
-import { KeycloakAuthenticatorDto } from './dto/keycloak-authenticator.dto';
 import { catchError, firstValueFrom, throwError, timeout } from 'rxjs';
-
-// interface IUserPhoneNumber {
-//   phoneNumber: string;
-// }
-
-// interface IUser {
-//   name: string;
-//   accountNumber: number;
-//   balance: number;
-// }
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller()
 export class AppController {
-  // private accountClient: ClientProxy;
-  private userClient: ClientProxy;
+  private sagaOrchestrator: ClientProxy;
 
   constructor() {
-    // this.accountClient = ClientProxyFactory.create({
-    //   transport: Transport.TCP,
-    //   options: {
-    //     host: process.env.ACCOUNT_SERVICE_HOST || 'localhost',
-    //     port: parseInt(process.env.ACCOUNT_SERVICE_PORT ?? '3001', 10),
-    //   },
-    // });
-
-    this.userClient = ClientProxyFactory.create({
+    this.sagaOrchestrator = ClientProxyFactory.create({
       transport: Transport.TCP,
       options: {
         host: process.env.USER_SERVICE_HOST || 'localhost',
-        port: parseInt(process.env.USER_SERVICE_PORT ?? '3001', 10),
+        port: parseInt(process.env.USER_SERVICE_PORT ?? '3004', 10),
       },
     });
   }
@@ -52,51 +33,25 @@ export class AppController {
   // не забываем про защиту роутов, этот защищать не нужно, а все на /api надо будет
   @Post('/webhook/keycloak')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  async keycloakWebhook(@Body() body: KeycloakAuthenticatorDto): Promise<void> {
+  async keycloakWebhook(@Body() body: CreateUserDto): Promise<void> {
     try {
       await firstValueFrom(
-        this.userClient.send({ cmd: 'register' }, { ...body }).pipe(
-          timeout(10000),
-          catchError(() => {
-            return throwError(() => new RpcException('USER_SERVICE_ERROR'));
-          }),
-        ),
+        this.sagaOrchestrator
+          .send<boolean, CreateUserDto>({ cmd: 'saga.register' }, { ...body })
+          .pipe(
+            timeout(10000),
+            catchError(() => {
+              return throwError(() => new RpcException('REGISTER_ERROR'));
+            }),
+          ),
       );
       return;
     } catch (err) {
-      console.error('Error in user-service call', err);
+      console.error('Error: ', err);
       throw new HttpException(
-        'Failed to register user in user-service',
+        'Failed to register user',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
-  // @Post('api/user')
-  // async trigger(@Body() user: IUserPhoneNumber): Promise<IUser> {
-  //   const payload = { phoneNumber: user.phoneNumber };
-
-  //   try {
-  //     // Отправляем сообщение в MS1
-  //     const response = await firstValueFrom<IUser>(
-  //       this.accountClient.send({ cmd: 'trigger' }, payload),
-  //     );
-  //     return response;
-  //   } catch (error) {
-  //     console.error('Ошибка в API Gateway:', error);
-
-  //     let errorMessage: string;
-  //     if (error && typeof error === 'object' && 'message' in error) {
-  //       errorMessage = (error as { message: string }).message;
-  //     } else {
-  //       errorMessage = 'Internal server error';
-  //     }
-
-  //     // Преобразуем RpcException из MS1 в HttpException для клиента
-  //     throw new HttpException(
-  //       errorMessage || 'Internal server error',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  // }
 }
