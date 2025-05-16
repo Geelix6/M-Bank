@@ -15,6 +15,7 @@ import {
 } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError, timeout } from 'rxjs';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserCredentialsDto } from './dto/user-credentials.dto';
 
 @Controller()
 export class AppController {
@@ -50,6 +51,45 @@ export class AppController {
       console.error('Error: ', err);
       throw new HttpException(
         'Failed to register user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('/api/gifts')
+  // данные нужно будет получить из токена
+  async claimGift() {
+    const userId = 'ad022397-a713-4ba5-b25b-afbeb182a476';
+
+    try {
+      const winAmount = await firstValueFrom(
+        this.sagaOrchestrator
+          .send<
+            boolean,
+            UserCredentialsDto
+          >({ cmd: 'saga.claimGift' }, { userId })
+          .pipe(
+            timeout(10000),
+            catchError((_e) => {
+              const e = _e as RpcException;
+              return throwError(() => e);
+            }),
+          ),
+      );
+      return winAmount;
+    } catch (_e) {
+      const e = _e as RpcException;
+      console.error('Error: ', e);
+
+      if (e.message == 'GIFT_NOT_READY') {
+        throw new HttpException(
+          'Your gift is not ready yet',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      throw new HttpException(
+        'Failed to claim gift',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
