@@ -6,6 +6,7 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ClientProxy,
@@ -14,6 +15,7 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError, timeout } from 'rxjs';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserCredentialsDto } from './dto/user-credentials.dto';
 import { TransactionDto } from './dto/transaction.dto';
@@ -32,7 +34,6 @@ export class AppController {
     });
   }
 
-  // не забываем про защиту роутов, этот защищать не нужно, а все на /api надо будет
   @Post('/webhook/keycloak')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async keycloakWebhook(@Body() body: CreateUserDto): Promise<void> {
@@ -57,6 +58,7 @@ export class AppController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('/api/gifts')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async claimGift(@Body() user: UserCredentialsDto): Promise<number> {
@@ -96,6 +98,7 @@ export class AppController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('/api/transactions')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async makeTransaction(@Body() transaction: TransactionDto): Promise<void> {

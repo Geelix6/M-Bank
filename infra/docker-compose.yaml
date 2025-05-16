@@ -37,6 +37,7 @@ services:
     image: ghcr.io/mbank/api-gateway:dev
     container_name: api-gateway
     environment:
+    # jwks uri
       - PORT=${API_GATEWAY_PORT}
       - USER_SERVICE_HOST=user-service
       - USER_SERVICE_PORT=${USER_SERVICE_PORT}
