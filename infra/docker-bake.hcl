@@ -47,6 +47,6 @@ target "gift-service" {
 }
 
 target "transaction-service" {
-  context = "../apps/transacion-service"
+  context = "../apps/transaction-service"
   tags = ["ghcr.io/mbank/transaction-service:dev"]
 }

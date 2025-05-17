@@ -22,4 +22,4 @@ gift-service:
 	docker buildx bake --allow=fs.read=../apps/gift-service gift-service
 
 transaction-service:
-	docker buildx bake --allow=fs.read=../apps/transacion-service transaction-service
+	docker buildx bake --allow=fs.read=../apps/transaction-service transaction-service

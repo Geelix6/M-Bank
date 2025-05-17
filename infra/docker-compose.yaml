@@ -45,8 +45,6 @@ services:
       - USER_SERVICE_PORT=${USER_SERVICE_PORT}
       - TRANSACTION_SERVICE_HOST=transaction-service
       - TRANSACTION_SERVICE_PORT=${TRANSACTION_SERVICE_PORT}
-    ports:
-      - "4000:${API_GATEWAY_PORT}"
   
   saga-orchestrator:
     image: ghcr.io/mbank/saga-orchestrator:dev
