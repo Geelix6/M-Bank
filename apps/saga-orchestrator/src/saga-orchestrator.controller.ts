@@ -32,16 +32,16 @@ export class SagaOrchestratorController {
     this.giftClient = ClientProxyFactory.create({
       transport: Transport.TCP,
       options: {
-        host: process.env.USER_SERVICE_HOST || 'localhost',
-        port: parseInt(process.env.USER_SERVICE_PORT ?? '3002', 10),
+        host: process.env.GIFT_SERVICE_HOST || 'localhost',
+        port: parseInt(process.env.GIFT_SERVICE_PORT ?? '3002', 10),
       },
     });
 
     this.transactionClient = ClientProxyFactory.create({
       transport: Transport.TCP,
       options: {
-        host: process.env.USER_SERVICE_HOST || 'localhost',
-        port: parseInt(process.env.USER_SERVICE_PORT ?? '3003', 10),
+        host: process.env.TRANSACTION_SERVICE_HOST || 'localhost',
+        port: parseInt(process.env.TRANSACTION_SERVICE_PORT ?? '3003', 10),
       },
     });
   }

@@ -37,10 +37,28 @@ services:
     image: ghcr.io/mbank/api-gateway:dev
     container_name: api-gateway
     environment:
-    # jwks uri
       - PORT=${API_GATEWAY_PORT}
+      - JWKS_URI=http://keycloak:8080/auth/realms/mbank/protocol/openid-connect/certs
+      - SAGA_ORCHESTRATOR_HOST=saga-orchestrator
+      - SAGA_ORCHESTRATOR_PORT=${SAGA_ORCHESTRATOR_PORT}
       - USER_SERVICE_HOST=user-service
       - USER_SERVICE_PORT=${USER_SERVICE_PORT}
+      - TRANSACTION_SERVICE_HOST=transaction-service
+      - TRANSACTION_SERVICE_PORT=${TRANSACTION_SERVICE_PORT}
+    ports:
+      - "4000:${API_GATEWAY_PORT}"
+  
+  saga-orchestrator:
+    image: ghcr.io/mbank/saga-orchestrator:dev
+    container_name: saga-orchestrator
+    environment:
+      - PORT=${SAGA_ORCHESTRATOR_PORT}
+      - USER_SERVICE_HOST=user-service
+      - USER_SERVICE_PORT=${USER_SERVICE_PORT}
+      - GIFT_SERVICE_HOST=gift-service
+      - GIFT_SERVICE_PORT=${GIFT_SERVICE_PORT}
+      - TRANSACTION_SERVICE_HOST=transaction-service
+      - TRANSACTION_SERVICE_PORT=${TRANSACTION_SERVICE_PORT}
 
   user-service:
     image: ghcr.io/mbank/user-service:dev
@@ -48,6 +66,20 @@ services:
     environment:
       - PORT=${USER_SERVICE_PORT}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_USER_SERVICE_DB}?schema=public
+  
+  gift-service:
+    image: ghcr.io/mbank/gift-service:dev
+    container_name: gift-service
+    environment:
+      - PORT=${GIFT_SERVICE_PORT}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_GIFT_SERVICE_DB}?schema=public
+  
+  transaction-service:
+    image: ghcr.io/mbank/transaction-service:dev
+    container_name: transaction-service
+    environment:
+      - PORT=${TRANSACTION_SERVICE_PORT}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_TRANSACTION_SERVICE_DB}?schema=public
 
   db:
     image: postgres:16.8-alpine3.21@sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c

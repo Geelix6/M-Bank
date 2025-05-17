@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Body,
+  Request,
   HttpException,
   HttpStatus,
   UsePipes,
@@ -19,17 +20,40 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserCredentialsDto } from './dto/user-credentials.dto';
 import { TransactionDto } from './dto/transaction.dto';
+import { TransactionDetailsDto } from './dto/transaction-details.dto';
+import { UserDataDto } from './dto/user-data.dto';
+import { TransactionRequestDto } from './dto/transaction-request.dto';
+import { UserUsernameDto } from './dto/user-username.dto';
+import { TransactionHistoryDto } from './dto/transaction-history.dto';
 
 @Controller()
 export class AppController {
   private sagaOrchestrator: ClientProxy;
+  private userClient: ClientProxy;
+  private transactionClient: ClientProxy;
 
   constructor() {
     this.sagaOrchestrator = ClientProxyFactory.create({
       transport: Transport.TCP,
       options: {
+        host: process.env.SAGA_ORCHESTRATOR_HOST || 'localhost',
+        port: parseInt(process.env.SAGA_ORCHESTRATOR_PORT ?? '3004', 10),
+      },
+    });
+
+    this.userClient = ClientProxyFactory.create({
+      transport: Transport.TCP,
+      options: {
         host: process.env.USER_SERVICE_HOST || 'localhost',
-        port: parseInt(process.env.USER_SERVICE_PORT ?? '3004', 10),
+        port: parseInt(process.env.USER_SERVICE_PORT ?? '3001', 10),
+      },
+    });
+
+    this.transactionClient = ClientProxyFactory.create({
+      transport: Transport.TCP,
+      options: {
+        host: process.env.TRANSACTION_SERVICE_HOST || 'localhost',
+        port: parseInt(process.env.TRANSACTION_SERVICE_PORT ?? '3003', 10),
       },
     });
   }
@@ -59,10 +83,45 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('/api/balance')
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async getBalance(
+    @Request() req: { user: UserCredentialsDto },
+  ): Promise<UserDataDto> {
+    const userId = req.user.userId;
+    try {
+      const balance = await firstValueFrom(
+        this.userClient
+          .send<
+            UserDataDto,
+            UserCredentialsDto
+          >({ cmd: 'user.data' }, { userId })
+          .pipe(
+            timeout(10000),
+            catchError(() => {
+              return throwError(
+                () => new RpcException('GET_USER_BALANCE_ERROR'),
+              );
+            }),
+          ),
+      );
+      return balance;
+    } catch (err) {
+      console.error('Error: ', err);
+      throw new HttpException(
+        'Failed to fetch balance',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('/api/gifts')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  async claimGift(@Body() user: UserCredentialsDto): Promise<number> {
-    const { userId } = user;
+  async claimGift(
+    @Request() req: { user: UserCredentialsDto },
+  ): Promise<number> {
+    const userId = req.user.userId;
 
     try {
       const winAmount = await firstValueFrom(
@@ -101,10 +160,33 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Post('/api/transactions')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  async makeTransaction(@Body() transaction: TransactionDto): Promise<void> {
-    const { fromUserId, toUserId, amount } = transaction;
+  async makeTransaction(
+    @Request() req: { user: UserCredentialsDto },
+    @Body()
+    transaction: TransactionRequestDto,
+  ): Promise<void> {
+    const { toUsername, amount } = transaction;
+    const fromUserId = req.user.userId;
 
     try {
+      const { userId: toUserId } = await firstValueFrom(
+        this.userClient
+          .send<
+            UserCredentialsDto,
+            UserUsernameDto
+          >({ cmd: 'user.getUuid' }, { username: toUsername })
+          .pipe(
+            timeout(10000),
+            catchError(() => {
+              return throwError(() => new RpcException('GET_USER_UUID_ERROR'));
+            }),
+          ),
+      );
+
+      if (toUserId == fromUserId) {
+        throw new RpcException('CANNOT_MAKE_SELF-TRANSACTION');
+      }
+
       await firstValueFrom(
         this.sagaOrchestrator
           .send<
@@ -131,8 +213,102 @@ export class AppController {
         );
       }
 
+      if (e.message == 'CANNOT_MAKE_SELF-TRANSACTION') {
+        throw new HttpException(
+          'You cannot make self-transaction',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       throw new HttpException(
         'Failed to make transaction',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/api/transactions/history')
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async getTransactionsHistory(
+    @Request() req: { user: UserCredentialsDto },
+  ): Promise<TransactionHistoryDto[]> {
+    const userId = req.user.userId;
+    try {
+      const transactions = await firstValueFrom(
+        this.transactionClient
+          .send<
+            TransactionDetailsDto[],
+            UserCredentialsDto
+          >({ cmd: 'transaction.history' }, { userId })
+          .pipe(
+            timeout(10000),
+            catchError(() => {
+              return throwError(
+                () => new RpcException('TRANSACTION_HISTORY_ERROR'),
+              );
+            }),
+          ),
+      );
+      const transactionHistory: TransactionHistoryDto[] = [];
+
+      for (const transaction of transactions) {
+        const {
+          username: fromUsername,
+          firstName: fromFirstName,
+          lastName: fromLastName,
+        } = await firstValueFrom(
+          this.userClient
+            .send<
+              UserDataDto,
+              UserCredentialsDto
+            >({ cmd: 'user.data' }, { userId: transaction.fromUserId })
+            .pipe(
+              timeout(10000),
+              catchError(() => {
+                return throwError(
+                  () => new RpcException('GET_USER_BALANCE_ERROR'),
+                );
+              }),
+            ),
+        );
+
+        const {
+          username: toUsername,
+          firstName: toFirstName,
+          lastName: toLastName,
+        } = await firstValueFrom(
+          this.userClient
+            .send<
+              UserDataDto,
+              UserCredentialsDto
+            >({ cmd: 'user.data' }, { userId: transaction.toUserId })
+            .pipe(
+              timeout(10000),
+              catchError(() => {
+                return throwError(
+                  () => new RpcException('GET_USER_BALANCE_ERROR'),
+                );
+              }),
+            ),
+        );
+
+        transactionHistory.push({
+          ...transaction,
+          fromUsername,
+          fromFirstName,
+          fromLastName,
+          toUsername,
+          toFirstName,
+          toLastName,
+        });
+      }
+
+      return transactionHistory;
+    } catch (err) {
+      console.error('Error: ', err);
+      throw new HttpException(
+        'Failed to fetch transactions',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

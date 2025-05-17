@@ -3,6 +3,8 @@ import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { TransactionService } from './transaction.service';
 import { TransactionDto } from './dto/transaction.dto';
 import { TransactionCredentialsDto } from './dto/transaction-credentials.dto';
+import { TransactionDetailsDto } from './dto/transaction-details.dto';
+import { UserCredentialsDto } from './dto/user-credentials.dto';
 
 @Controller()
 export class TransactionController {
@@ -29,6 +31,18 @@ export class TransactionController {
       return await this.transactionService.deleteTransaction(transaction);
     } catch {
       throw new RpcException('TRANSACTION_DELETION_FAILED');
+    }
+  }
+
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @MessagePattern({ cmd: 'transaction.history' })
+  async getTransactionsHistory(
+    @Payload() user: UserCredentialsDto,
+  ): Promise<TransactionDetailsDto[]> {
+    try {
+      return await this.transactionService.getTransactionsHistory(user);
+    } catch {
+      throw new RpcException('TRANSACTION_HISTORY_FAILED');
     }
   }
 }

@@ -3,6 +3,8 @@ import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserCredentialsDto } from './dto/user-credentials.dto';
+import { UserUsernameDto } from './dto/user-username.dto';
+import { UserDataDto } from './dto/user-data.dto';
 import { ChangeBalaceDto } from './dto/change-balance.dto';
 
 @Controller()
@@ -28,6 +30,30 @@ export class UserController {
       return await this.userService.deleteUser(user);
     } catch {
       throw new RpcException('REGISTER_FAILED');
+    }
+  }
+
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @MessagePattern({ cmd: 'user.getUuid' })
+  async getUuidFromUsername(
+    @Payload() user: UserUsernameDto,
+  ): Promise<UserCredentialsDto> {
+    try {
+      return await this.userService.getUuidFromUsername(user);
+    } catch {
+      throw new RpcException('GET_USER_BALANCE_FAILED');
+    }
+  }
+
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @MessagePattern({ cmd: 'user.data' })
+  async getUserBalance(
+    @Payload() user: UserCredentialsDto,
+  ): Promise<UserDataDto> {
+    try {
+      return await this.userService.getData(user);
+    } catch {
+      throw new RpcException('GET_USER_BALANCE_FAILED');
     }
   }
 

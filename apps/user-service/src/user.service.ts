@@ -3,6 +3,8 @@ import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from './prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserCredentialsDto } from './dto/user-credentials.dto';
+import { UserUsernameDto } from './dto/user-username.dto';
+import { UserDataDto } from './dto/user-data.dto';
 import { ChangeBalaceDto } from './dto/change-balance.dto';
 
 @Injectable()
@@ -38,6 +40,42 @@ export class UserService {
     } catch (e) {
       console.log(e);
       throw new RpcException('USER_DELETION_FAILED');
+    }
+  }
+
+  async getUuidFromUsername(
+    user: UserUsernameDto,
+  ): Promise<UserCredentialsDto> {
+    const { username } = user;
+    try {
+      const userData = await this.prisma.user.findUnique({
+        where: { username },
+      });
+      if (!userData) {
+        throw new RpcException('USER_NOT_FOUND');
+      }
+
+      return { userId: userData.id };
+    } catch (e) {
+      console.log(e);
+      throw new RpcException('GET_USER_BALANCE_FAILED');
+    }
+  }
+
+  async getData(user: UserCredentialsDto): Promise<UserDataDto> {
+    const { userId } = user;
+    try {
+      const userData = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!userData) {
+        throw new RpcException('USER_NOT_FOUND');
+      }
+
+      return { ...userData, balance: userData.balance.toNumber() };
+    } catch (e) {
+      console.log(e);
+      throw new RpcException('GET_USER_BALANCE_FAILED');
     }
   }
 

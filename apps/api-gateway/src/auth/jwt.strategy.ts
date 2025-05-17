@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import {
   ExtractJwt,
@@ -6,6 +6,10 @@ import {
   StrategyOptionsWithoutRequest,
 } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
+
+export interface KeycloakJwtPayload {
+  sub: string;
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -24,7 +28,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  validate() {
-    return {};
+  validate(payload: KeycloakJwtPayload) {
+    if (!payload.sub) {
+      throw new UnauthorizedException();
+    }
+    return { userId: payload.sub };
   }
 }
