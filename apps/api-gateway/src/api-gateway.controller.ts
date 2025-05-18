@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Request,
   HttpException,
@@ -83,7 +84,7 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/api/balance')
+  @Get('/api/balance')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async getBalance(
     @Request() req: { user: UserCredentialsDto },
@@ -116,7 +117,7 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/api/gifts')
+  @Get('/api/gifts')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async claimGift(
     @Request() req: { user: UserCredentialsDto },
@@ -228,7 +229,7 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/api/transactions/history')
+  @Get('/api/transactions/history')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async getTransactionsHistory(
     @Request() req: { user: UserCredentialsDto },
