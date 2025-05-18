@@ -1,30 +1,16 @@
-import { useKeycloak } from '@react-keycloak/web'
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
+import Header from './Header'
+import Footer from './Footer'
 
 export default function ProtectedLayout() {
-  const { keycloak } = useKeycloak()
-
   return (
-    <div className="p-4">
-      <div className="mb-10 flex justify-between">
-        <nav>
-          <Link to="/" className="mr-4">
-            Главная
-          </Link>
-          <Link to="/history" className="mr-4">
-            Истории
-          </Link>
-          <Link to="/transaction" className="mr-4">
-            Транзакции
-          </Link>
-          <Link to="/not-found">404</Link>
-        </nav>
-        <button className="cursor-pointer border p-1" onClick={() => keycloak.logout()}>
-          Выйти из аккаунта
-        </button>
+    <div className="flex min-h-screen flex-col text-sm text-slate-800 sm:text-base">
+      <div className="mx-auto mb-5 w-full max-w-6xl flex-grow px-4 pt-10 sm:mb-10 sm:px-8">
+        <Header className="mb-5 sm:mb-10" />
+        <Outlet />
       </div>
 
-      <Outlet />
+      <Footer />
     </div>
   )
 }

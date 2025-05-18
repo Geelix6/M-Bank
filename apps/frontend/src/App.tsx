@@ -9,23 +9,21 @@ import Main from './pages/Main'
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="p-4">
-        <Routes>
-          <Route
-            element={
-              <RequireAuth>
-                <ProtectedLayout />
-              </RequireAuth>
-            }
-          >
-            <Route path="/" element={<Main />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/transaction" element={<Transaction />} />
-          </Route>
+      <Routes>
+        <Route
+          element={
+            <RequireAuth>
+              <ProtectedLayout />
+            </RequireAuth>
+          }
+        >
+          <Route path="/" element={<Main />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/transaction" element={<Transaction />} />
+        </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </BrowserRouter>
   )
 }
