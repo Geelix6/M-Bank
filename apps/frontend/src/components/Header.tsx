@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { useKeycloak } from '@react-keycloak/web'
 import { Link, NavLink } from 'react-router-dom'
+import { Popover } from 'antd'
 import MBankLogoIcon from './icons/MBankLogoIcon'
 import GearIcon from './icons/GearIcon'
 
@@ -10,20 +10,16 @@ interface Props {
 
 export default function Header({ className }: Props) {
   const { keycloak } = useKeycloak()
-  const [showConfirm, setShowConfirm] = useState(false)
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `${isActive ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-200'}
      px-1.5 py-1 rounded transition-colors duration-200 sm:px-2`
 
-  const handleLogoutClick = () => {
-    setShowConfirm((prev) => !prev)
-  }
-
-  const confirmLogout = () => {
-    setShowConfirm(false)
-    keycloak.logout()
-  }
+  const popoverContent = (
+    <p className="font-inter cursor-pointer text-red-600" onClick={() => keycloak.logout()}>
+      Выйти из аккаунта
+    </p>
+  )
 
   return (
     <>
@@ -44,37 +40,13 @@ export default function Header({ className }: Props) {
           <NavLink to="/transaction" className={getNavLinkClass} end>
             Транзакции
           </NavLink>
-          {/* <NavLink to="/not-found">404</NavLink> */}
         </nav>
-        {/* <button
-          className="size-8 cursor-pointer rounded-md bg-gray-200 p-1"
-          onClick={handleLogoutClick}
-          // onClick={() => keycloak.logout()}
-        >
-          <GearIcon className="text-gray-700"></GearIcon>
-        </button> */}
 
-        {/* Кнопка с тултипом ниже */}
-        <div className="relative">
-          <button
-            className="size-8 cursor-pointer rounded-md bg-gray-800/10 p-1"
-            onClick={handleLogoutClick}
-          >
-            <GearIcon className="text-gray-700" />
+        <Popover content={popoverContent} placement="bottomRight" trigger="click">
+          <button className="size-8 cursor-pointer rounded-md bg-gray-200 p-1">
+            <GearIcon className="text-gray-700"></GearIcon>
           </button>
-
-          {showConfirm && (
-            <div className="absolute right-0 z-10 mt-2 w-48 rounded border border-gray-200 bg-white p-3 shadow-lg">
-              <p className="mb-2 text-sm text-gray-700">Выйти из аккаунта?</p>
-              <button
-                className="w-full rounded bg-red-600 py-1 text-white transition hover:bg-red-700"
-                onClick={confirmLogout}
-              >
-                Выйти
-              </button>
-            </div>
-          )}
-        </div>
+        </Popover>
       </header>
     </>
   )
