@@ -35,7 +35,7 @@ export default function Header({ className }: Props) {
             Главная
           </NavLink>
           <NavLink to="/history" className={getNavLinkClass} end>
-            Истории
+            История
           </NavLink>
           <NavLink to="/transaction" className={getNavLinkClass} end>
             Транзакции
