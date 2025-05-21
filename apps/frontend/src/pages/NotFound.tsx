@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import MBankLogoIcon from '../components/icons/MBankLogoIcon'
-import ArrowRight from '../components/icons/ArrowRight'
+import ArrowRightIcon from '../components/icons/ArrowRightIcon'
 
 export default function NotFound() {
   return (
@@ -15,7 +15,7 @@ export default function NotFound() {
           to="/"
           className="mb-4 flex items-center gap-x-1 text-blue-600 transition-colors duration-200 hover:text-blue-400"
         >
-          На главную <ArrowRight className="size-4" />
+          На главную <ArrowRightIcon className="size-4" />
         </Link>
         <div className="mb-8 h-px w-full bg-gray-500"></div>
         <div className="flex items-center gap-x-2">
