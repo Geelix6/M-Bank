@@ -33,6 +33,18 @@ export class UserController {
     }
   }
 
+  @MessagePattern({ cmd: 'user.getAll' })
+  async getAllUsers(): Promise<UserDataDto[]> {
+    try {
+      return await this.userService.getUsers();
+    } catch (e) {
+      if (e instanceof RpcException) {
+        throw e;
+      }
+      throw new RpcException('GET_USER_BALANCE_FAILED');
+    }
+  }
+
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   @MessagePattern({ cmd: 'user.getUuid' })
   async getUuidFromUsername(

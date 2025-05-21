@@ -43,6 +43,22 @@ export class UserService {
     }
   }
 
+  async getUsers(): Promise<UserDataDto[]> {
+    try {
+      const users = await this.prisma.user.findMany({
+        orderBy: { balance: 'desc' },
+      });
+
+      return users.map((user) => ({
+        ...user,
+        balance: user.balance.toNumber(),
+      }));
+    } catch (e) {
+      console.log(e);
+      throw new RpcException('GET_USERS_FAILED');
+    }
+  }
+
   async getUuidFromUsername(
     user: UserUsernameDto,
   ): Promise<UserCredentialsDto> {

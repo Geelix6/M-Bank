@@ -93,6 +93,21 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/api/users')
+  async getAllUsers() {
+    const users = await firstValueFrom(
+      this.userClient.send<UserDataDto>({ cmd: 'user.getAll' }, {}).pipe(
+        timeout(10000),
+        catchError(() => {
+          return throwError(() => new RpcException('GET_USERS_ERROR'));
+        }),
+      ),
+    );
+
+    return users;
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('/api/balance')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async getBalance(
