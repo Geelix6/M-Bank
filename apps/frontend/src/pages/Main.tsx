@@ -4,6 +4,7 @@ import { useKeycloak } from '@react-keycloak/web'
 import { Modal } from 'antd'
 import { UserDataDto } from '../dto/userDataDto'
 import { ErrorResponseDto } from '../dto/errorResponseDto'
+import { TransactionDto } from '../dto/TransactionDto'
 import { fetchApi } from '../utils/fetchApi'
 import { getTimeOfDay } from '../utils/getTimeOfDay'
 import { formatRubles } from '../utils/formatRoubles'
@@ -15,18 +16,6 @@ import BankIcon from '../components/icons/BankIcon'
 import RubleIcon from '../components/icons/RubleIcon'
 import { FortuneWheel } from '../components/FortuneWheel'
 import IncomeIcon from '../components/icons/IncomeIcon'
-
-interface Transaction {
-  fromUserId: string
-  toUserId: string
-  amount: number
-  time: string
-  type: string
-  fromFirstName: string
-  fromLastName: string
-  toFirstName: string
-  toLastName: string
-}
 
 export default function Main() {
   const { keycloak } = useKeycloak()
@@ -46,7 +35,7 @@ export default function Main() {
   const [balanceError, setBalanceError] = useState<string | null>(null)
 
   // transactions
-  const [txs, setTxs] = useState<Transaction[] | null>(null)
+  const [txs, setTxs] = useState<TransactionDto[] | null>(null)
   const [txLoading, setTxLoading] = useState(false)
   const [txError, setTxError] = useState<string | null>(null)
 
@@ -76,7 +65,7 @@ export default function Main() {
     setTxLoading(true)
     setTxError(null)
     try {
-      const data = await fetchApi<Transaction[]>('/api/transactions/history', {
+      const data = await fetchApi<TransactionDto[]>('/api/transactions/history', {
         method: 'GET',
         token: keycloak.token,
       })

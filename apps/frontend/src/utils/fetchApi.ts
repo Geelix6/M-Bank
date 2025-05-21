@@ -17,12 +17,26 @@ export async function fetchApi<T>(url: string, options: RequestOptions): Promise
     body: options.body != null ? JSON.stringify(options.body) : undefined,
   })
 
-  const data = (await resp.json()) as T | ErrorResponseDto
-
   if (!resp.ok) {
-    const err = data as ErrorResponseDto
-    throw new Error(err.message || `Ошибка ${resp.status}`)
+    let errMsg = `Ошибка ${resp.status}`
+    try {
+      const errorData = (await resp.json()) as ErrorResponseDto
+      errMsg = errorData.message || errMsg
+    } catch {
+      /**/
+    }
+    throw new Error(errMsg)
   }
 
-  return data as T
+  if (resp.status === 204) {
+    return undefined as T
+  }
+
+  const contentType = resp.headers.get('Content-Type') || ''
+  if (!contentType.includes('application/json')) {
+    return undefined as T
+  }
+
+  const data = (await resp.json()) as T
+  return data
 }
