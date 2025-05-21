@@ -32,6 +32,19 @@ export class GiftController {
   }
 
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @MessagePattern({ cmd: 'gift.time' })
+  async handleGiftStatus(@Payload() user: UserCredentialsDto): Promise<Date> {
+    try {
+      return await this.giftService.getGiftStatus(user);
+    } catch (e) {
+      if (e instanceof RpcException) {
+        throw e;
+      }
+      throw new RpcException('GIFT_STATUS_FAILED');
+    }
+  }
+
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   @MessagePattern({ cmd: 'gift.claim' })
   async handleGiftClaim(@Payload() user: UserCredentialsDto): Promise<number> {
     try {

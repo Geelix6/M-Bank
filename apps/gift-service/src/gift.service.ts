@@ -47,6 +47,24 @@ export class GiftService {
     }
   }
 
+  async getGiftStatus(user: UserCredentialsDto): Promise<Date> {
+    const { userId } = user;
+    try {
+      const gift = await this.prisma.gift.findUnique({
+        where: { userId },
+      });
+      if (!gift) {
+        throw new RpcException('GIFT_NOT_FOUND');
+      }
+      return gift.notBefore;
+    } catch (e) {
+      if (e instanceof RpcException) {
+        throw e;
+      }
+      throw new RpcException('GIFT_STATUS_FAILED');
+    }
+  }
+
   async claimGift(user: UserCredentialsDto): Promise<number> {
     const { userId } = user;
     const now = new Date();

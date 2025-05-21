@@ -43,9 +43,11 @@ services:
       - SAGA_ORCHESTRATOR_PORT=${SAGA_ORCHESTRATOR_PORT}
       - USER_SERVICE_HOST=user-service
       - USER_SERVICE_PORT=${USER_SERVICE_PORT}
+      - GIFT_SERVICE_HOST=gift-service
+      - GIFT_SERVICE_PORT=${GIFT_SERVICE_PORT}
       - TRANSACTION_SERVICE_HOST=transaction-service
       - TRANSACTION_SERVICE_PORT=${TRANSACTION_SERVICE_PORT}
-  
+
   saga-orchestrator:
     image: ghcr.io/mbank/saga-orchestrator:dev
     container_name: saga-orchestrator
@@ -64,14 +66,14 @@ services:
     environment:
       - PORT=${USER_SERVICE_PORT}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_USER_SERVICE_DB}?schema=public
-  
+
   gift-service:
     image: ghcr.io/mbank/gift-service:dev
     container_name: gift-service
     environment:
       - PORT=${GIFT_SERVICE_PORT}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_GIFT_SERVICE_DB}?schema=public
-  
+
   transaction-service:
     image: ghcr.io/mbank/transaction-service:dev
     container_name: transaction-service

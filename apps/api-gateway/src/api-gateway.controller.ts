@@ -31,6 +31,7 @@ import { TransactionHistoryDto } from './dto/transaction-history.dto';
 export class AppController {
   private sagaOrchestrator: ClientProxy;
   private userClient: ClientProxy;
+  private giftClient: ClientProxy;
   private transactionClient: ClientProxy;
 
   constructor() {
@@ -47,6 +48,14 @@ export class AppController {
       options: {
         host: process.env.USER_SERVICE_HOST || 'localhost',
         port: parseInt(process.env.USER_SERVICE_PORT ?? '3001', 10),
+      },
+    });
+
+    this.giftClient = ClientProxyFactory.create({
+      transport: Transport.TCP,
+      options: {
+        host: process.env.GIFT_SERVICE_HOST || 'localhost',
+        port: parseInt(process.env.GIFT_SERVICE_PORT ?? '3002', 10),
       },
     });
 
@@ -114,6 +123,28 @@ export class AppController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/api/gifts/remain-time')
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async getGiftTime(
+    @Request() req: { user: UserCredentialsDto },
+  ): Promise<Date> {
+    const userId = req.user.userId;
+
+    const notBefore = await firstValueFrom(
+      this.giftClient
+        .send<Date, UserCredentialsDto>({ cmd: 'gift.time' }, { userId })
+        .pipe(
+          timeout(10000),
+          catchError(() => {
+            return throwError(() => new RpcException('GIFT_TIME_ERROR'));
+          }),
+        ),
+    );
+
+    return new Date(notBefore);
   }
 
   @UseGuards(JwtAuthGuard)
