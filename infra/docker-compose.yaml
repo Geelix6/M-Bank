@@ -1,6 +1,6 @@
 services:
   reverse-proxy:
-    image: ghcr.io/mbank/reverse-proxy:dev
+    image: geelix6/reverse-proxy
     container_name: reverse-proxy
     environment:
       - API_GATEWAY_PORT=${API_GATEWAY_PORT}
@@ -30,11 +30,11 @@ services:
       - ../apps/keycloak/themes:/opt/keycloak/themes
 
   frontend:
-    image: ghcr.io/mbank/frontend:dev
+    image: geelix6/frontend
     container_name: frontend
 
   api-gateway:
-    image: ghcr.io/mbank/api-gateway:dev
+    image: geelix6/api-gateway
     container_name: api-gateway
     environment:
       - PORT=${API_GATEWAY_PORT}
@@ -49,7 +49,7 @@ services:
       - TRANSACTION_SERVICE_PORT=${TRANSACTION_SERVICE_PORT}
 
   saga-orchestrator:
-    image: ghcr.io/mbank/saga-orchestrator:dev
+    image: geelix6/saga-orchestrator
     container_name: saga-orchestrator
     environment:
       - PORT=${SAGA_ORCHESTRATOR_PORT}
@@ -61,21 +61,21 @@ services:
       - TRANSACTION_SERVICE_PORT=${TRANSACTION_SERVICE_PORT}
 
   user-service:
-    image: ghcr.io/mbank/user-service:dev
+    image: geelix6/user-service
     container_name: user-service
     environment:
       - PORT=${USER_SERVICE_PORT}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_USER_SERVICE_DB}?schema=public
 
   gift-service:
-    image: ghcr.io/mbank/gift-service:dev
+    image: geelix6/gift-service
     container_name: gift-service
     environment:
       - PORT=${GIFT_SERVICE_PORT}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_GIFT_SERVICE_DB}?schema=public
 
   transaction-service:
-    image: ghcr.io/mbank/transaction-service:dev
+    image: geelix6/transaction-service
     container_name: transaction-service
     environment:
       - PORT=${TRANSACTION_SERVICE_PORT}

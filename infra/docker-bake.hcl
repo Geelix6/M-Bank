@@ -9,44 +9,44 @@ group "default" {
     "transaction-service"
   ]
   tags = [
-    "ghcr.io/mbank/reverse-proxy:dev",
-    "ghcr.io/mbank/frontend:dev",
-    "ghcr.io/mbank/api-gateway:dev",
-    "ghcr.io/mbank/user-service:dev"
+    "geelix6/reverse-proxy:latest",
+    "geelix6/frontend:latest",
+    "geelix6/api-gateway:latest",
+    "geelix6/user-service:latest"
   ]
 }
 
 target "reverse-proxy" {
   context = "../apps/reverse-proxy"
-  tags = ["ghcr.io/mbank/reverse-proxy:dev"]
+  tags = ["geelix6/reverse-proxy:latest"]
 }
 
 target "frontend" {
   context = "../apps/frontend"
-  tags = ["ghcr.io/mbank/frontend:dev"]
+  tags = ["geelix6/frontend:latest"]
 }
 
 target "api-gateway" {
   context = "../apps/api-gateway"
-  tags = ["ghcr.io/mbank/api-gateway:dev"]
+  tags = ["geelix6/api-gateway:latest"]
 }
 
 target "saga-orchestrator" {
   context = "../apps/saga-orchestrator"
-  tags = ["ghcr.io/mbank/saga-orchestrator:dev"]
+  tags = ["geelix6/saga-orchestrator:latest"]
 }
 
 target "user-service" {
   context = "../apps/user-service"
-  tags = ["ghcr.io/mbank/user-service:dev"]
+  tags = ["geelix6/user-service:latest"]
 }
 
 target "gift-service" {
   context = "../apps/gift-service"
-  tags = ["ghcr.io/mbank/gift-service:dev"]
+  tags = ["geelix6/gift-service:latest"]
 }
 
 target "transaction-service" {
   context = "../apps/transaction-service"
-  tags = ["ghcr.io/mbank/transaction-service:dev"]
+  tags = ["geelix6/transaction-service:latest"]
 }
