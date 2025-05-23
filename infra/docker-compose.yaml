@@ -4,6 +4,7 @@ services:
     container_name: reverse-proxy
     environment:
       - API_GATEWAY_PORT=${API_GATEWAY_PORT}
+      - KC_PORT=${KC_PORT}
     ports:
       - "80:80"
 
@@ -22,7 +23,7 @@ services:
       KC_SPI_AUTHENTICATOR_REGISTER_WITH_BALANCE_USER_SERVICE_URL: http://api-gateway:${API_GATEWAY_PORT}/webhook/keycloak
       # KC_SPI_AUTHENTICATOR_REGISTER_WITH_BALANCE_USER_SERVICE_URL: http://host.docker.internal:3000/webhook/keycloak
     ports:
-      - "8080:8080"
+      - "${KC_PORT}:8080"
     command: ["start", "--import-realm", "--http-enabled=true"]
     volumes:
       - ../apps/keycloak/realms:/opt/keycloak/data/import
@@ -38,7 +39,7 @@ services:
     container_name: api-gateway
     environment:
       - PORT=${API_GATEWAY_PORT}
-      - JWKS_URI=http://keycloak:8080/auth/realms/mbank/protocol/openid-connect/certs
+      - JWKS_URI=http://keycloak:${KC_PORT}/auth/realms/mbank/protocol/openid-connect/certs
       - SAGA_ORCHESTRATOR_HOST=saga-orchestrator
       - SAGA_ORCHESTRATOR_PORT=${SAGA_ORCHESTRATOR_PORT}
       - USER_SERVICE_HOST=user-service
